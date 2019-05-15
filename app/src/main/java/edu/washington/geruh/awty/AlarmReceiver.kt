@@ -10,7 +10,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val msg = intent!!.getStringExtra("MSG")
         val num = intent!!.getStringExtra("PHONE_NUMBER")
         val phoneNumber = "(" + num.substring(0, 3) + ") " + num.substring(3, 6) + "-" + num.substring(6)
-        val toastMsg = "Texting " + phoneNumber + "\n" + msg
+        val toastMsg = "Texting " + phoneNumber + ":\n" + msg
         Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show()
     }
 }

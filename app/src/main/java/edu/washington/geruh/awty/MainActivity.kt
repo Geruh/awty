@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "Please Provide a message to send", Toast.LENGTH_SHORT).show()
                 } else {
                     startButton.text = "Stop"
+                    Toast.makeText(this, "The service has been Begun", Toast.LENGTH_LONG).show()
                     val timeInterval = timeDelay.text.toString().toLong() * 60000
                     intent.putExtra("MSG", message.text.toString())
                     intent.putExtra("PHONE_NUMBER", phoneNumber.text.toString())
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 startButton.text = "Start"
-                val pendingIntent = PendingIntent.getBroadcast(applicationContext, 0,intent,PendingIntent.FLAG_CANCEL_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(this, 0,intent,PendingIntent.FLAG_CANCEL_CURRENT)
                 alarm.cancel(pendingIntent)
                 Toast.makeText(this, "The service has been stopped", Toast.LENGTH_LONG).show()
             }
