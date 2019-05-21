@@ -9,6 +9,9 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,27 +26,38 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, AlarmReceiver::class.java)
 
         startButton.setOnClickListener {
-            if (startButton.text.toString().toLowerCase() == "start") {
-                if (phoneNumber.text.toString().isEmpty() && phoneNumber.text.toString().length < 10) {
-                    Toast.makeText(this, "Please provide a valid Phone Number", Toast.LENGTH_SHORT).show()
-                } else if (timeDelay.text.toString().toFloat() < 0) {
-                    Toast.makeText(this, "Please provide a positive value in minutes", Toast.LENGTH_SHORT).show()
-                } else if (message.text.toString().isEmpty()) {
-                    Toast.makeText(this, "Please Provide a message to send", Toast.LENGTH_SHORT).show()
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS)
+                == PackageManager.PERMISSION_GRANTED) {
+                if (startButton.text.toString().toLowerCase() == "start") {
+                    if (phoneNumber.text.toString().isEmpty() && phoneNumber.text.toString().length < 10) {
+                        Toast.makeText(this, "Please provide a valid Phone Number", Toast.LENGTH_SHORT).show()
+                    } else if (timeDelay.text.toString().toFloat() < 0) {
+                        Toast.makeText(this, "Please provide a positive value in minutes", Toast.LENGTH_SHORT).show()
+                    } else if (message.text.toString().isEmpty()) {
+                        Toast.makeText(this, "Please Provide a message to send", Toast.LENGTH_SHORT).show()
+                    } else {
+                        startButton.text = "Stop"
+                        Toast.makeText(this, "The service has been Begun", Toast.LENGTH_LONG).show()
+                        val timeInterval = timeDelay.text.toString().toLong() * 60000
+                        intent.putExtra("MSG", message.text.toString())
+                        intent.putExtra("PHONE_NUMBER", phoneNumber.text.toString())
+                        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+                        alarm.setRepeating(
+                            AlarmManager.RTC_WAKEUP,
+                            System.currentTimeMillis(),
+                            timeInterval,
+                            pendingIntent
+                        )
+                    }
                 } else {
-                    startButton.text = "Stop"
-                    Toast.makeText(this, "The service has been Begun", Toast.LENGTH_LONG).show()
-                    val timeInterval = timeDelay.text.toString().toLong() * 60000
-                    intent.putExtra("MSG", message.text.toString())
-                    intent.putExtra("PHONE_NUMBER", phoneNumber.text.toString())
-                    val pendingIntent = PendingIntent.getBroadcast(this,0,intent,0)
-                    alarm.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), timeInterval, pendingIntent)
+                    startButton.text = "Start"
+                    val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+                    alarm.cancel(pendingIntent)
+                    Toast.makeText(this, "The service has been stopped", Toast.LENGTH_LONG).show()
                 }
             } else {
-                startButton.text = "Start"
-                val pendingIntent = PendingIntent.getBroadcast(this, 0,intent,PendingIntent.FLAG_CANCEL_CURRENT)
-                alarm.cancel(pendingIntent)
-                Toast.makeText(this, "The service has been stopped", Toast.LENGTH_LONG).show()
+                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.SEND_SMS), 1)
+                Toast.makeText(this, "Please accept permissions, and start again :)", Toast.LENGTH_LONG).show()
             }
         }
 
